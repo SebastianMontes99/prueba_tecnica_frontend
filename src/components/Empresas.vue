@@ -73,12 +73,16 @@
 </template>
 
 <script>
+// Importa la librería axios para realizar peticiones HTTP
 import axios from 'axios';
 
 export default {
+  // Nombre del componente
   name: 'ListaEmpresas',
+  // Datos del componente
   data() {
     return {
+      // Objeto que representa una nueva empresa con valores predeterminados
       nuevaEmpresa: {
         cod_empresa: '',
         ruc: '',
@@ -86,53 +90,76 @@ export default {
         direccion: '',
         activo: true,
       },
+      // Array que almacenará la lista de empresas
       empresas: [],
+      // Variable para almacenar la empresa que se está editando
       empresaEditando: null,
     };
   },
+  // Método ejecutado cuando se crea el componente
   created() {
+    // Llama al método para obtener la lista de empresas
     this.obtenerEmpresas();
   },
+  // Métodos del componente
   methods: {
+    // Método asincrónico para obtener la lista de empresas desde la API
     async obtenerEmpresas() {
       try {
+        // Realiza una petición GET a la API para obtener las empresas
         const response = await axios.get('https://localhost:7118/api/Empresas');
+        // Asigna la lista de empresas al array del componente
         this.empresas = response.data;
       } catch (error) {
+        // Maneja los errores en caso de fallo en la obtención de empresas
         console.error('Error al obtener empresas:', error);
       }
     },
+    // Método asincrónico para agregar una nueva empresa a la lista
     async agregarEmpresa() {
       try {
+        // Realiza una petición POST a la API para agregar una nueva empresa
         const response = await axios.post('https://localhost:7118/api/Empresas', this.nuevaEmpresa);
+        // Agrega la nueva empresa a la lista del componente
         this.empresas.push(response.data);
+        // Reinicia el objeto nuevaEmpresa con valores predeterminados
         this.nuevaEmpresa = { cod_empresa: '', ruc: '', razon_social: '', direccion: '', activo: true };
       } catch (error) {
+        // Maneja los errores, específicamente el caso de código de empresa duplicado
         if (error.response && error.response.status === 400 && error.response.data && error.response.data.cod_empresa) {
-          // Manejar el caso específico de error de código de empresa duplicado
           alert('Error: El código de empresa ya existe.');
         } else {
           console.error('Error al agregar empresa:', error);
         }
       }
     },
+    // Método para iniciar la edición de una empresa
     editarEmpresa(empresa) {
       this.empresaEditando = empresa;
     },
+    // Método asincrónico para guardar los cambios realizados en la edición de una empresa
     async guardarEdicion(empresa) {
       try {
+        // Realiza una petición PUT a la API para actualizar la empresa editada
         await axios.put(`https://localhost:7118/api/Empresas/${empresa.cod_empresa}`, empresa);
+        // Reinicia la variable de empresaEditando a null para salir del modo de edición
         this.empresaEditando = null;
       } catch (error) {
+        // Maneja los errores en caso de fallo al guardar la edición
         console.error('Error al guardar edición:', error);
       }
     },
+    // Método asincrónico para eliminar una empresa de la lista
     async eliminarEmpresa(index) {
       try {
+        // Obtiene la empresa a eliminar
         const empresa = this.empresas[index];
+        // Realiza una petición DELETE a la API para eliminar la empresa
         await axios.delete(`https://localhost:7118/api/Empresas/${empresa.cod_empresa}`);
+        // Elimina la empresa del array del componente
         this.empresas.splice(index, 1);
       } catch (error) {
+        // Maneja los errores en caso de fallo al eliminar la empresa
         console.error('Error al eliminar empresa:', error);
       }
     },
